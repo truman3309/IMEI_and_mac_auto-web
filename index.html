@@ -867,7 +867,7 @@
                     <polyline points="20 6 9 17 4 12"/>
                   </svg>
                 </div>
-                <span>MAC 組數：</span><strong id="sumMac">—</strong>
+                <span>MAC 組數（每4筆一組）：</span><strong id="sumMac">—</strong>
               </li>
               <li>
                 <div class="s-icon s-green">
@@ -1126,11 +1126,17 @@ function processFile(file) {
         const srcData = XLSX.utils.sheet_to_json(srcWS, { header: 1, defval: null });
 
         // 取 IMEI（A欄，含標題列）
-        const imeiData = srcData.map(r => (r[0] != null ? String(r[0]) : ''));
+        // 過濾末尾空行：只保留到最後一個非空值
+        const imeiAll = srcData.map(r => (r[0] != null ? String(r[0]).trim() : ''));
+        const lastNonEmpty = imeiAll.reduceRight((acc, v, i) => acc === -1 && v ? i : acc, -1);
+        const imeiData = imeiAll.slice(0, lastNonEmpty + 1);
+
+        // 實際資料列數（排除標題列 index 0）
+        const imeiCount = imeiData.slice(1).filter(v => v).length;
 
         // 取 MAC（B欄，排除標題列）
         const macRaw = srcData.slice(1)
-          .map(r => (r[1] != null ? String(r[1]) : ''))
+          .map(r => (r[1] != null ? String(r[1]).trim() : ''))
           .filter(v => v);
 
         setStep(2);
@@ -1194,8 +1200,8 @@ function processFile(file) {
                 document.getElementById('processingArea').style.display = 'none';
                 document.getElementById('fName').textContent   = file.name;
                 document.getElementById('fInfo').textContent   = `${wb.SheetNames.length} 個工作表`;
-                document.getElementById('sumImei').textContent = `${(totalGroups.length - 1).toLocaleString()} 筆`;
-                document.getElementById('sumMac').textContent  = `${imeiData.toLocaleString()} 組`;
+                document.getElementById('sumImei').textContent = `${imeiCount.toLocaleString()} 筆`;
+                document.getElementById('sumMac').textContent  = `${totalGroups.toLocaleString()} 組`;
                 document.getElementById('previewCount').textContent = `${newData.length.toLocaleString()} 列`;
 
                 buildPreview();
