@@ -1194,8 +1194,8 @@ function processFile(file) {
                 document.getElementById('processingArea').style.display = 'none';
                 document.getElementById('fName').textContent   = file.name;
                 document.getElementById('fInfo').textContent   = `${wb.SheetNames.length} 個工作表`;
-                document.getElementById('sumImei').textContent = `${(imeiData.length - 1).toLocaleString()} 筆`;
-                document.getElementById('sumMac').textContent  = `${totalGroups.toLocaleString()} 組`;
+                document.getElementById('sumImei').textContent = `${(totalGroups.length - 1).toLocaleString()} 筆`;imeiData
+                document.getElementById('sumMac').textContent  = `${imeiData.toLocaleString()} 組`;
                 document.getElementById('previewCount').textContent = `${newData.length.toLocaleString()} 列`;
 
                 buildPreview();
