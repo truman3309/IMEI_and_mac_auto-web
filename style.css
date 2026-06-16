@@ -1,0 +1,189 @@
+/* =========================================================
+   MAC 完整自動化工具 — 樣式表 style.css
+   分區說明（搭配 修改指南.md 使用）：
+   1. 全域與變數    2. 頂部導覽列    3. 首頁
+   4. 共用版型      5. 上傳/處理中   6. 結果區
+   7. 預覽表格      8. 篩選產生器    9. 響應式
+   ========================================================= */
+
+/* ── 1. 全域重置與 CSS 變數 ── */
+/* 全域重置：盒模型 border-box、清除預設外距內距 */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+/* :root 定義全站可用的色票與字型變數，改色只要動這裡 */
+:root{
+  --bg:#f5f4f0;        /* 頁面背景色（米白） */
+  --surface:#fff;      /* 卡片／面板底色（白） */
+  --border:#e2e0d8;    /* 邊框線顏色（淺灰） */
+  --text:#1a1916;      /* 主要文字色（近黑） */
+  --muted:#7a7870;     /* 次要文字色（灰） */
+  --hint:#b0aea6;      /* 提示文字色（更淺灰） */
+  --accent:#2a5c3f;    /* 主題強調色（深綠）★改主色動這 */
+  --accent-hover:#1e4530;/* 滑鼠移上的深綠 */
+  --accent-light:#e8f3ec;/* 淺綠（強調色淡底） */
+  --green:#1a5c35;     /* 成功訊息綠 */
+  --danger:#c0392b;    /* 錯誤訊息紅 */
+  --mono:'DM Mono',monospace;       /* 等寬字型（數字、程式感文字） */
+  --sans:'Noto Sans TC',sans-serif; /* 一般無襯線字型（中文內文） */
+}
+
+/* 整體 body */
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* ── 2. 頂部導覽列 ── */
+header{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:0 40px;display:flex;align-items:center;gap:0;
+  position:sticky;top:0;z-index:100; /* 黏在頂端、疊在最上層 */
+}
+.logo{font-size:15px;font-weight:600;padding:18px 0;margin-right:24px;white-space:nowrap;}
+.logo span{color:var(--accent);}              /* Logo 中強調字上色 */
+.nav{display:flex;align-items:stretch;gap:0;flex:1;}
+.nav-btn{
+  display:flex;align-items:center;gap:7px;padding:0 18px;
+  font-family:var(--sans);font-size:13px;font-weight:500;
+  color:var(--muted);background:none;border:none;cursor:pointer;
+  border-bottom:2px solid transparent;transition:all .15s;
+  white-space:nowrap;height:58px;
+}
+.nav-btn:hover{color:var(--text);}            /* 移上去文字變深 */
+.nav-btn.active{color:var(--accent);border-bottom-color:var(--accent);} /* 選中：綠字綠底線 */
+.nav-btn svg{width:14px;height:14px;flex-shrink:0;}
+.tag{font-size:10px;padding:2px 7px;border-radius:20px;background:var(--bg);
+  border:1px solid var(--border);color:var(--hint);font-family:var(--mono);}
+
+/* 頁面切換：.page 預設隱藏，加 .active 才顯示 */
+.page{display:none;} .page.active{display:block;}
+
+/* ── 3. 首頁 HOME ── */
+.home-wrap{max-width:700px;margin:0 auto;padding:52px 40px;}
+.home-wrap h2{font-size:22px;font-weight:600;margin-bottom:8px;}
+.home-wrap > p{font-size:14px;color:var(--muted);margin-bottom:36px;line-height:1.7;}
+.flow-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  overflow:hidden;margin-bottom:20px;}
+.flow-card-hd{padding:14px 20px;background:var(--accent-light);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;}
+.flow-card-hd svg{width:16px;height:16px;color:var(--accent);}
+.flow-card-hd span{font-size:13px;font-weight:600;color:var(--accent);}
+.flow-card-bd{padding:0;}
+.flow-step{display:flex;align-items:flex-start;gap:14px;padding:14px 20px;
+  border-bottom:1px solid var(--border);}
+.flow-step:last-child{border-bottom:none;}
+.flow-num{width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;
+  font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.flow-step h4{font-size:13px;font-weight:600;margin-bottom:3px;}
+.flow-step p{font-size:12px;color:var(--muted);line-height:1.5;}
+.flow-arrow{text-align:center;padding:6px;color:var(--hint);font-size:18px;}
+.start-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:10px;
+  font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;
+  margin-top:8px;
+}
+.start-btn:hover{background:var(--accent-hover);}
+.start-btn svg{width:16px;height:16px;}
+
+/* ── 4. 共用版型元件 ── */
+.wrap{max-width:960px;margin:0 auto;padding:36px 40px;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.panel-hd{padding:12px 18px;border-bottom:1px solid var(--border);
+  font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;
+  display:flex;align-items:center;justify-content:space-between;}
+.panel-bd{padding:18px;}
+
+/* ── 5. 上傳區與處理中 ── */
+.upload-zone{background:var(--surface);border:2px dashed var(--border);border-radius:14px;
+  padding:52px;text-align:center;cursor:pointer;transition:all .15s;}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--accent);background:var(--accent-light);}
+.upload-icon{width:52px;height:52px;background:var(--accent-light);border-radius:14px;
+  display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
+.upload-icon svg{width:26px;height:26px;color:var(--accent);}
+.upload-zone h2{font-size:15px;font-weight:600;margin-bottom:6px;}
+.upload-zone p{font-size:13px;color:var(--muted);}
+#fileInput{display:none;}                      /* 隱藏真正的檔案 input */
+
+.processing{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:52px;text-align:center;display:none;} /* 預設隱藏 */
+.spinner{width:40px;height:40px;border:3px solid var(--border);
+  border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px;}
+@keyframes spin{to{transform:rotate(360deg);}} /* 旋轉動畫 */
+.processing p{font-size:13px;color:var(--muted);}
+.processing-steps{margin-top:16px;display:flex;flex-direction:column;gap:6px;align-items:center;}
+.p-step{font-size:12px;font-family:var(--mono);padding:4px 12px;border-radius:20px;
+  background:var(--bg);color:var(--hint);transition:all .3s;}
+.p-step.active{background:var(--accent-light);color:var(--accent);font-weight:500;} /* 進行中 */
+.p-step.done{background:#f0fdf4;color:var(--green);}                                 /* 已完成 */
+
+/* ── 6. 結果區 ── */
+.result-area{display:none;}                     /* 預設隱藏 */
+.result-grid{display:grid;grid-template-columns:280px 1fr;gap:18px;align-items:start;} /* 左摘要右預覽 */
+.file-badge{display:flex;align-items:center;gap:10px;padding:10px 12px;
+  background:var(--accent-light);border-radius:8px;margin-bottom:14px;}
+.file-badge svg{width:16px;height:16px;color:var(--accent);flex-shrink:0;}
+.file-badge-name{font-size:12px;font-weight:600;color:var(--accent);word-break:break-all;}
+.file-badge-sub{font-size:11px;color:var(--green);}
+.summary-list{list-style:none;margin-bottom:14px;}
+.summary-list li{display:flex;align-items:center;gap:8px;padding:7px 0;
+  border-bottom:1px solid var(--border);font-size:12px;}
+.summary-list li:last-child{border-bottom:none;}
+.s-icon{width:20px;height:20px;border-radius:6px;display:flex;align-items:center;
+  justify-content:center;flex-shrink:0;}
+.s-icon svg{width:11px;height:11px;}
+.s-green{background:var(--accent-light);} .s-green svg{color:var(--accent);}
+.s-yellow{background:#fffbeb;} .s-yellow svg{color:#d97706;}
+.s-blue{background:#eff6ff;} .s-blue svg{color:#2563eb;}
+.summary-list span{color:var(--muted);}
+.summary-list strong{color:var(--text);}
+.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
+.btn{width:100%;padding:10px;display:flex;align-items:center;justify-content:center;
+  gap:8px;border:none;border-radius:8px;font-family:var(--sans);font-size:13px;
+  font-weight:500;cursor:pointer;transition:all .15s;margin-bottom:8px;}
+.btn:last-child{margin-bottom:0;}
+.btn:active{transform:scale(.98);}             /* 按下微縮回饋 */
+.btn-green{background:var(--accent);color:#fff;} .btn-green:hover{background:var(--accent-hover);}
+.btn-outline{background:var(--surface);color:var(--muted);border:1px solid var(--border);}
+.btn-outline:hover{background:var(--bg);color:var(--text);}
+.btn svg{width:14px;height:14px;flex-shrink:0;}
+.smsg{font-size:12px;text-align:center;margin-top:8px;font-family:var(--mono);min-height:16px;color:var(--green);}
+.smsg.err{color:var(--danger);}
+
+/* ── 7. 預覽表格 ── */
+.tbl-wrap{overflow:auto;max-height:480px;}     /* 可捲動，最高 480px */
+table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px;}
+thead th{background:var(--bg);padding:8px 10px;text-align:left;
+  border-bottom:1px solid var(--border);font-weight:600;color:var(--muted);
+  font-size:10px;position:sticky;top:0;z-index:1;white-space:nowrap;} /* 表頭置頂固定 */
+tbody td{padding:6px 10px;border-bottom:1px solid var(--border);height:28px;
+  font-size:11px;white-space:nowrap;}
+tbody tr:last-child td{border-bottom:none;}
+.cy{background:#fef9c3;}                        /* 黃底儲存格 */
+.cv{color:var(--accent);font-weight:500;}      /* 有值：綠字 */
+.ce{color:var(--hint);}                        /* 空白：淺灰 */
+.tbl-foot{padding:8px 16px;font-size:11px;color:var(--hint);
+  border-top:1px solid var(--border);font-family:var(--mono);}
+
+/* ── 8. 篩選表格產生器 ── */
+.gen-grid{display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start;}
+.field{margin-bottom:16px;} .field:last-of-type{margin-bottom:0;}
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;}
+input[type=number],input[type=text]{
+  width:100%;font-family:var(--mono);font-size:13px;padding:9px 11px;
+  border:1px solid var(--border);border-radius:8px;background:var(--bg);
+  color:var(--text);outline:none;transition:border-color .15s;}
+input:focus{border-color:var(--accent);}       /* 聚焦邊框轉綠 */
+.hint-text{font-size:11px;color:var(--hint);margin-top:4px;}
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.stat{background:var(--bg);border-radius:8px;padding:10px 12px;}
+.stat-lbl{font-size:11px;color:var(--muted);margin-bottom:2px;}
+.stat-val{font-family:var(--mono);font-size:18px;font-weight:500;}
+td.v{color:var(--accent);font-weight:500;}
+.flt{display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;
+  border:1px solid var(--border);border-radius:2px;margin-left:4px;font-size:8px;
+  color:var(--muted);vertical-align:middle;background:var(--surface);} /* 模擬 AutoFilter 下拉 */
+
+/* ── 9. 響應式（手機 ≤ 720px）── */
+@media(max-width:720px){
+  header{padding:0 16px;} .logo{margin-right:12px;} .nav-btn{padding:0 10px;font-size:12px;}
+  .wrap{padding:20px 16px;} .home-wrap{padding:32px 16px;}
+  .result-grid,.gen-grid{grid-template-columns:1fr;} /* 雙欄改單欄堆疊 */
+}
