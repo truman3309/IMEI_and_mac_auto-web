@@ -227,7 +227,7 @@ function downloadResult(){
   st.className='smsg';st.textContent='生成中...';
   setTimeout(()=>{
     try{
-      XLSX.writeFile(resultWB,`${baseName}_工廠使用.xlsx`); // 原檔名_工廠使用
+      XLSX.writeFile(resultWB,`${baseName}_明細表.xlsx`);
       st.textContent='✓ 已下載完成';
     }catch(e){st.className='smsg err';st.textContent='錯誤：'+e.message;}
   },50);
