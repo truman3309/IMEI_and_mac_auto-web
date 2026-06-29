@@ -1,104 +1,165 @@
 /* =========================================================
-   MAC 完整自動化工具 — 程式邏輯 script.js
-   分區說明（搭配 修改指南.md 使用）：
-   A. 頁面切換          goPage()
-   B. 篩選表格產生器     getCols / getMax / updateGen / doDownload
-   C. 自動整合處理       上傳事件 / setStep / processFile
-   D. 結果預覽與下載     buildPreview / downloadResult / resetAll
+   號段分配工具集 — 合併程式邏輯
+   區塊：A. 頁面切換
+        B. 功能① 欄位堆疊（前綴 st = stack）
+        C. 功能② MAC 自動整合（沿用原 IMEI/MAC 工具）
+   兩功能各自獨立，ID 已分開（堆疊頁一律 st 開頭）避免衝突。
    ========================================================= */
 
 /* ══════════ A. 頁面切換 ══════════ */
-// 依傳入的 id（home / gen / auto）切換顯示對應頁面與導覽高亮
 function goPage(id){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));   // 全部頁面先隱藏
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));// 全部導覽取消高亮
-  document.getElementById('page-'+id).classList.add('active');                   // 目標頁面顯示
-  document.getElementById('nav-'+id).classList.add('active');                    // 目標導覽高亮
-  window.scrollTo(0,0);                                                          // 捲回頂端
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.getElementById('nav-'+id).classList.add('active');
+  window.scrollTo(0,0);
 }
 
-/* ══════════ B. 篩選表格產生器 ══════════ */
-// 讀取欄位名稱輸入框 → 用逗號切割、去空白、濾掉空字串 → 回傳陣列
-function getCols(){return document.getElementById('colNames').value.split(',').map(s=>s.trim()).filter(Boolean);}
-// 讀取最大數字 N，限制 1~99999，無法解析時預設 3000
-function getMax(){return Math.max(1,Math.min(99999,parseInt(document.getElementById('maxNum').value)||3000));}
+/* ══════════ B. 功能① 欄位堆疊 ══════════ */
+(function(){
+  const $ = id => document.getElementById(id);
+  const drop = $('stDrop'), fileInput = $('stFile'),
+        result = $('stResult'), errBox = $('stError');
+  let outWb = null, outName = 'merged.xlsx';
 
-// 依目前設定即時更新統計數字與預覽表格（輸入框一改變就跑）
-function updateGen(){
-  const n=getMax(),                       // 最大數字 N
-        cols=getCols(),                   // 欄位陣列
-        dc=Math.max(1,cols.length-1),     // 資料欄數 = 總欄數-1（扣標題欄），至少 1
-        dr=n*dc;                          // 資料列數 = N × 資料欄數
-  document.getElementById('sRows').textContent=dr.toLocaleString();      // 更新「資料列」
-  document.getElementById('sTotal').textContent=(dr+1).toLocaleString(); // 更新「總列數」(+1 標題)
-  const show=Math.min(n*dc,16);           // 預覽最多顯示 16 列
-  let html='<thead><tr>';
-  cols.forEach(c=>{html+=`<th>${c}<span class="flt">▾</span></th>`;});   // 表頭加篩選小圖示
-  html+='</tr></thead><tbody>';
-  let cnt=0;
-  outer:for(let i=1;i<=n;i++){            // 外層 1~N
-    for(let d=0;d<dc;d++){                // 內層每個資料欄
-      if(cnt>=show)break outer;           // 達到預覽上限就停（一次跳出兩層）
-      html+='<tr>';
-      cols.forEach((_,ci)=>{
-        if(ci===0)html+='<td></td>';                      // 第一欄（標題欄）留空
-        else if(ci-1===d)html+=`<td class="v">${i}</td>`; // 對角線位置填入數值 i
-        else html+='<td></td>';                           // 其餘留空
-      });
-      html+='</tr>';cnt++;
-    }
+  // 把任意儲存格值轉成乾淨字串，避免科學記號
+  function S(v){
+    if(v===null||v===undefined) return '';
+    if(typeof v==='number') return Number.isInteger(v) ? v.toString() : String(v);
+    return String(v).trim();
   }
-  html+='</tbody>';
-  document.getElementById('prevTbl').innerHTML=html;       // 寫入預覽表格
-  const rem=n*dc-show;                                     // 剩餘未顯示列數
-  document.getElementById('tbl-foot').textContent=rem>0?`... 還有 ${rem.toLocaleString()} 列未顯示`:`共 ${(n*dc).toLocaleString()} 列資料`;
-}
+  function showError(msg){ errBox.textContent=msg; errBox.classList.add('show'); result.classList.remove('show'); }
+  function clearError(){ errBox.classList.remove('show'); }
 
-// 產生並下載篩選範本 Excel
-function doDownload(){
-  const cols=getCols(),max=getMax(),dc=cols.length-1;       // 欄位 / N / 資料欄數
-  const st=document.getElementById('genStatus');            // 狀態訊息元素
-  st.className='smsg';st.style.color='var(--muted)';st.textContent='生成中...';
-  setTimeout(()=>{                                          // 延遲讓訊息先顯示再運算
-    try{
-      const wb=XLSX.utils.book_new();                       // 新空白活頁簿
-      const data=[cols];                                    // 第一列放欄位標題
-      for(let n=1;n<=max;n++){                              // 每個數字
-        for(let d=0;d<dc;d++){                              // 每個資料欄各一列
-          data.push(cols.map((_,ci)=>ci===0?null:(ci-1===d?n:null))); // 對角線填 n
-        }
+  function handleFile(file){
+    clearError();
+    if(!file) return;
+    const ok = /\.(xlsx|xlsm|csv)$/i.test(file.name);
+    if(!ok){ showError('請選擇 .xlsx、.xlsm 或 .csv 檔案。'); return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+      try { process(e.target.result, file.name); }
+      catch(err){ console.error(err); showError('讀取失敗：' + (err.message || '檔案格式無法解析')); }
+    };
+    reader.onerror = () => showError('讀取檔案時發生錯誤，請再試一次。');
+    reader.readAsArrayBuffer(file);
+  }
+
+  function process(buffer, originalName){
+    const wb = XLSX.read(new Uint8Array(buffer), {type:'array'});
+    if(!wb.SheetNames.length){ showError('檔案裡找不到任何工作表。'); return; }
+    const sheetName = wb.SheetNames[0];
+    const ws = wb.Sheets[sheetName];
+    const aoa = XLSX.utils.sheet_to_json(ws, {header:1, raw:true, defval:null, blankrows:false});
+    if(aoa.length < 1){ showError('工作表是空的，沒有資料可以處理。'); return; }
+
+    const header = aoa[0] || [];
+    const body = aoa.slice(1);
+
+    // 各欄獨立收集非空白值
+    const colA=[], colB=[], colC=[], colD=[];
+    for(const row of body){
+      const a=S(row && row[0]), b=S(row && row[1]), c=S(row && row[2]), d=S(row && row[3]);
+      if(a!=='') colA.push(a);
+      if(b!=='') colB.push(b);
+      if(c!=='') colC.push(c);
+      if(d!=='') colD.push(d);
+    }
+    if(colC.length===0 && colD.length===0){
+      showError('C 欄和 D 欄都沒有資料，沒有東西可以接到底下。請確認檔案是 A／B 與 C／D 兩組並排的格式。');
+      return;
+    }
+
+    // C 接 A 底下、D 接 B 底下
+    const imei = colA.concat(colC);
+    const mac  = colB.concat(colD);
+    const headA = S(header[0]) || 'IMEI';
+    const headB = S(header[1]) || 'MAC';
+
+    // 組輸出 AOA
+    const out = [[headA, headB]];
+    const n = Math.max(imei.length, mac.length);
+    for(let i=0;i<n;i++) out.push([ imei[i]||'', mac[i]||'' ]);
+
+    // 全部以文字型態寫入，避免 Excel 轉成科學記號
+    const outWs = XLSX.utils.aoa_to_sheet(out);
+    const range = XLSX.utils.decode_range(outWs['!ref']);
+    for(let R=range.s.r; R<=range.e.r; R++){
+      for(let C=range.s.c; C<=range.e.c; C++){
+        const addr = XLSX.utils.encode_cell({r:R,c:C});
+        const cell = outWs[addr];
+        if(cell && cell.v!==''){ cell.t='s'; cell.v=String(cell.v); cell.z='@'; }
       }
-      const ws=XLSX.utils.aoa_to_sheet(data);               // 二維陣列轉工作表
-      ws['!cols']=cols.map((_,i)=>({wch:i===0?16:8}));      // 欄寬：第一欄 16、其餘 8
-      ws['!autofilter']={ref:XLSX.utils.encode_range({s:{r:0,c:0},e:{r:0,c:cols.length-1}})}; // 加 AutoFilter
-      XLSX.utils.book_append_sheet(wb,ws,'工作表1');         // 加入活頁簿
-      XLSX.writeFile(wb,`mac_篩選表格${max}.xlsx`);          // 觸發下載
-      st.style.color='var(--green)';
-      st.textContent=`✓ 已下載 mac_篩選表格${max}.xlsx`;
-    }catch(e){st.className='smsg err';st.textContent='錯誤：'+e.message;}
-  },50);
-}
-// 監聽兩個輸入框：內容改變即時更新預覽
-document.getElementById('maxNum').addEventListener('input',updateGen);
-document.getElementById('colNames').addEventListener('input',updateGen);
-updateGen(); // 載入時先跑一次畫出初始預覽
+    }
+    outWs['!cols'] = [{wch:20},{wch:18}];
+    outWb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(outWb, outWs, sheetName);
+    outName = originalName.replace(/\.(xlsx|xlsm|csv)$/i,'') + '_合併完成.xlsx';
 
-/* ══════════ C. 自動整合處理 ══════════ */
-let resultWB=null,      // 處理完成後的活頁簿物件（供下載）
-    baseName='',        // 原始檔名（去副檔名），用於組輸出檔名
-    previewRows=[];     // 「工廠使用」工作表完整資料（供預覽）
-const PREVIEW_LIMIT=200; // 預覽最多顯示 200 列
+    render({ originalName, colA:colA.length, colB:colB.length, colC:colC.length, colD:colD.length,
+             imei, mac });
+  }
 
-// 拖曳進入：加 .drag 視覺回饋
+  function render(d){
+    clearError();
+    $('stFname').textContent = d.originalName;
+    $('stImeiTotal').innerHTML = d.imei.length.toLocaleString() + ' <small>筆</small>';
+    $('stMacTotal').innerHTML  = d.mac.length.toLocaleString()  + ' <small>筆</small>';
+    $('stImeiBreak').innerHTML = `原 A 欄 <b>${d.colA.toLocaleString()}</b> ＋ C 欄移入 <b>${d.colC.toLocaleString()}</b>`;
+    $('stMacBreak').innerHTML  = `原 B 欄 <b>${d.colB.toLocaleString()}</b> ＋ D 欄移入 <b>${d.colD.toLocaleString()}</b>`;
+
+    // 預覽：接合點前後各幾筆（以 A 欄筆數為接合點）
+    const tb = $('stPreviewBody'); tb.innerHTML = '';
+    const join = d.colA;
+    const total = Math.max(d.imei.length, d.mac.length);
+    const head = [0,1,2];
+    const around = [join-1, join, join+1].filter(i=>i>=0 && i<total);
+    const tail = [total-2, total-1].filter(i=>i>=0);
+    const set = [...new Set([...head, ...around, ...tail])].filter(i=>i>=0 && i<total).sort((a,b)=>a-b);
+
+    let prev = -1;
+    for(const i of set){
+      if(prev!==-1 && i>prev+1){
+        const tr=document.createElement('tr'); tr.className='gap';
+        tr.innerHTML='<td colspan="3">· · ·</td>'; tb.appendChild(tr);
+      }
+      const fromMove = i>=join;
+      const tr=document.createElement('tr');
+      if(fromMove) tr.className='from-move';
+      tr.innerHTML = `<td class="idx">${i+2}</td><td>${d.imei[i]||''}</td><td>${d.mac[i]||''}</td>`;
+      tb.appendChild(tr);
+      prev=i;
+    }
+    result.classList.add('show');
+    result.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+
+  // 互動綁定
+  $('stDownload').addEventListener('click', () => { if(outWb) XLSX.writeFile(outWb, outName); });
+  $('stReset').addEventListener('click', () => {
+    outWb=null; fileInput.value=''; result.classList.remove('show'); clearError();
+    drop.scrollIntoView({behavior:'smooth', block:'center'});
+  });
+  drop.addEventListener('click', ()=>fileInput.click());
+  drop.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); fileInput.click(); }});
+  fileInput.addEventListener('change', e=>handleFile(e.target.files[0]));
+  ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.add('dragging'); }));
+  ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.remove('dragging'); }));
+  drop.addEventListener('drop', e=>{ const f=e.dataTransfer.files[0]; handleFile(f); });
+})();
+
+/* ══════════ C. 功能② MAC 自動整合 ══════════ */
+let resultWB=null,      // 處理完成後的活頁簿（供下載）
+    baseName='',        // 原始檔名（去副檔名）
+    previewRows=[];     // 「工廠使用」完整資料（供預覽）
+const PREVIEW_LIMIT=200;
+
 function onDragOver(e){e.preventDefault();document.getElementById('uploadZone').classList.add('drag');}
-// 拖曳離開：移除 .drag
 function onDragLeave(){document.getElementById('uploadZone').classList.remove('drag');}
-// 放下檔案：取第一個檔案處理
 function onDrop(e){e.preventDefault();onDragLeave();const f=e.dataTransfer.files[0];if(f)processFile(f);}
-// 點擊選檔：取選到的檔案處理
 function onFileChange(e){const f=e.target.files[0];if(f)processFile(f);}
 
-// 依步驟 n 更新五個處理膠囊狀態（< n = done，= n = active）
+// 依步驟 n 更新五個處理膠囊狀態
 function setStep(n){
   for(let i=1;i<=5;i++){
     const el=document.getElementById('ps'+i);
@@ -110,16 +171,17 @@ function setStep(n){
 
 // 核心流程：讀取上傳 Excel → 整理資料 → 建立「工廠使用」工作表
 function processFile(file){
-  baseName=file.name.replace(/\.[^.]+$/,'');                       // 去副檔名
-  document.getElementById('uploadZone').style.display='none';       // 隱藏上傳區
-  document.getElementById('processingArea').style.display='block';  // 顯示處理中
+  baseName=file.name.replace(/\.[^.]+$/,'');
+  document.getElementById('uploadZone').style.display='none';
+  document.getElementById('processingArea').style.display='block';
+  document.getElementById('resultArea').style.display='none';
   setStep(1);
 
   const reader=new FileReader();
   reader.onload=function(ev){
     setTimeout(()=>{
       try{
-        const wb=XLSX.read(ev.target.result,{type:'array'});        // 解析 Excel
+        const wb=XLSX.read(ev.target.result,{type:'array'});
 
         // ① 找名稱含「号段分配」的工作表
         const srcName=wb.SheetNames.find(n=>n.includes('号段分配'));
@@ -128,8 +190,7 @@ function processFile(file){
           resetAll(); return;
         }
         const srcWS=wb.Sheets[srcName];
-        const srcData=XLSX.utils.sheet_to_json(srcWS,{header:1,defval:null}); // 轉二維陣列
-
+        const srcData=XLSX.utils.sheet_to_json(srcWS,{header:1,defval:null});
         const imeiData=srcData.map(r=>r[0]!=null?String(r[0]):'');                  // A欄 IMEI（含標題）
         const macRaw=srcData.slice(1).map(r=>r[1]!=null?String(r[1]):'').filter(v=>v); // B欄 MAC（去標題去空值）
 
@@ -158,21 +219,19 @@ function processFile(file){
               // ④ 組「工廠使用」二維資料：A=IMEI,B~E=mac1~4,F=pcba sn,G=組裝sn
               const newData=imeiData.map((imei,i)=>{
                 if(i===0) return ['IMEI','mac1','mac2','mac3','mac4',
-                  'pcba sn(按照Thinkstart規則生成)','組裝sn(按照Thinkstart規則生成)']; // 標題列
+                  'pcba sn(按照Thinkstart規則生成)','組裝sn(按照Thinkstart規則生成)'];
                 const g=macGroups[i-1]||['','','',''];
-                return [imei, g[0], g[1], g[2], g[3], '', ''];                       // F、G 留空
+                return [imei, g[0], g[1], g[2], g[3], '', ''];
               });
-
               const newWS=XLSX.utils.aoa_to_sheet(newData);
 
               setStep(5);
               setTimeout(()=>{
-                newWS['!cols']=[{wch:18},{wch:16},{wch:16},{wch:16},{wch:16},{wch:28},{wch:28}]; // 欄寬
-                XLSX.utils.book_append_sheet(wb,newWS,'工廠使用'); // 加入活頁簿
-                resultWB=wb;        // 供下載
-                previewRows=newData;// 供預覽
+                newWS['!cols']=[{wch:18},{wch:16},{wch:16},{wch:16},{wch:16},{wch:28},{wch:28}];
+                XLSX.utils.book_append_sheet(wb,newWS,'工廠使用');
+                resultWB=wb;
+                previewRows=newData;
 
-                // 更新結果區 UI
                 document.getElementById('processingArea').style.display='none';
                 document.getElementById('fName').textContent=file.name;
                 document.getElementById('fInfo').textContent=`${wb.SheetNames.length} 個工作表`;
@@ -192,10 +251,9 @@ function processFile(file){
       }
     },200);
   };
-  reader.readAsArrayBuffer(file); // 以 ArrayBuffer 讀檔（對應 type:'array'）
+  reader.readAsArrayBuffer(file);
 }
 
-/* ══════════ D. 結果預覽與下載 ══════════ */
 // 把 previewRows 畫成 HTML 表格（最多 PREVIEW_LIMIT 列）
 function buildPreview(){
   const limit=Math.min(previewRows.length,PREVIEW_LIMIT);
@@ -204,13 +262,13 @@ function buildPreview(){
     const r=previewRows[i];
     const isHdr=i===0;
     html+='<tr>';
-    html+=`<td class="cy ${isHdr?'':'cv'}">${r[0]||''}</td>`; // A IMEI 黃底
-    html+=`<td class="${r[1]?'cv':'ce'}">${r[1]||''}</td>`;   // B mac1
-    html+=`<td class="${r[2]?'cv':'ce'}">${r[2]||''}</td>`;   // C mac2
-    html+=`<td class="${r[3]?'cv':'ce'}">${r[3]||''}</td>`;   // D mac3
-    html+=`<td class="${r[4]?'cv':'ce'}">${r[4]||''}</td>`;   // E mac4
-    html+=`<td class="ce">${r[5]||''}</td>`;                  // F pcba sn
-    html+=`<td class="ce">${r[6]||''}</td>`;                  // G 組裝sn
+    html+=`<td class="cy ${isHdr?'':'cv'}">${r[0]||''}</td>`;
+    html+=`<td class="${r[1]?'cv':'ce'}">${r[1]||''}</td>`;
+    html+=`<td class="${r[2]?'cv':'ce'}">${r[2]||''}</td>`;
+    html+=`<td class="${r[3]?'cv':'ce'}">${r[3]||''}</td>`;
+    html+=`<td class="${r[4]?'cv':'ce'}">${r[4]||''}</td>`;
+    html+=`<td class="ce">${r[5]||''}</td>`;
+    html+=`<td class="ce">${r[6]||''}</td>`;
     html+='</tr>';
   }
   document.getElementById('previewBody').innerHTML=html;
@@ -233,12 +291,12 @@ function downloadResult(){
   },50);
 }
 
-// 清空所有狀態，回到最初上傳畫面
+// 清空狀態，回到上傳畫面
 function resetAll(){
   resultWB=null; previewRows=[];
   document.getElementById('resultArea').style.display='none';
   document.getElementById('processingArea').style.display='none';
   document.getElementById('uploadZone').style.display='block';
-  document.getElementById('fileInput').value=''; // 清空已選檔（可重選同檔）
+  document.getElementById('fileInput').value='';
   document.getElementById('dlMsg').textContent='';
 }
