@@ -440,8 +440,8 @@ const AutoTool = (() => {
   function renderSummary(file, workbook, imeiCount, macGroupCount, rowCount) {
     dom.fName.textContent = file.name;
     dom.fInfo.textContent = `${workbook.SheetNames.length} 個工作表`;
-    dom.sumImei.textContent = Utils.formatCount(imeiCount, '筆');
-    dom.sumMac.textContent = Utils.formatCount(macGroupCount, '組');
+    dom.sumImei.textContent = Utils.formatCount(macGroupCount, '筆');
+    dom.sumMac.textContent = Utils.formatCount(imeiCount, '組');
     dom.previewCount.textContent = Utils.formatCount(rowCount, '列');
   }
 
