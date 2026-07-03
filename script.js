@@ -91,9 +91,13 @@ class ToolError extends Error {}
    ══════════════════════════════════════════════════════════ */
 const UI = {
   $(id) { return document.getElementById(id); },
-  show(el) { el.style.display = ''; },
+  /**
+   * 顯示元素。務必給明確的 display 值（預設 'block'），
+   * 不能寫成 el.style.display = ''，那只是清空 inline style，
+   * 一旦 CSS 有 display:none 的預設規則，元素會直接退回隱藏狀態。
+   */
+  show(el, display = 'block') { el.style.display = display; },
   hide(el) { el.style.display = 'none'; },
-  showFlex(el) { el.style.display = 'flex'; },
 
   /**
    * 在指定容器「之後」插入（或重用）一個錯誤提示框。
@@ -483,7 +487,7 @@ const AutoTool = (() => {
     busy = true;
     UI.clearError(errorBox);
     UI.hide(dom.uploadZone);
-    UI.showFlex(dom.processingArea);
+    UI.show(dom.processingArea, 'flex');
     UI.hide(dom.resultArea);
 
     try {
