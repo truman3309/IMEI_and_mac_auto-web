@@ -1,47 +1,258 @@
 <!DOCTYPE html>
+<!-- 宣告這是 HTML5 文件 -->
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
+<!-- 文字編碼用 UTF-8，才能正確顯示中文 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>iPAS 刷題 · 中級 AI 應用規劃師</title>
+<!-- 響應式設定：畫面寬度跟著裝置走、初始縮放 1.0 -->
+<title>號段分配工具集</title>
+
+<!-- 載入字型：Noto Sans TC（中文內文）＋ DM Mono（數字／程式感） -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- 載入 SheetJS（xlsx）函式庫：兩個功能都用它讀寫 Excel，只需載入一次 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header class="top">
-  <div class="top-in">
-    <div class="brand" onclick="go('home')">
-      <span class="mark">刷題<b>·</b>iPAS</span>
-      <span class="sub">中級 AI 應用規劃師</span>
-    </div>
-    <div class="top-stats">
-      <div class="tstat"><div class="n" id="ts-done">0</div><div class="l">已作答</div></div>
-      <div class="tstat"><div class="n" id="ts-acc">—</div><div class="l">正確率</div></div>
-      <button class="icon-btn" id="theme-btn" title="切換深色/淺色" onclick="toggleTheme()">◐</button>
-    </div>
-  </div>
+
+<!-- ========== 頂部導覽列 ========== -->
+<header>
+  <div class="logo">號段分配<span>工具集</span></div>
+  <nav class="nav">
+    <!-- 首頁 -->
+    <button class="nav-btn active" onclick="goPage('home')" id="nav-home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      首頁
+    </button>
+    <!-- 功能①：欄位堆疊 -->
+    <button class="nav-btn" onclick="goPage('stack')" id="nav-stack">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="7" height="18" rx="1"/><rect x="13" y="3" width="7" height="8" rx="1"/><line x1="16.5" y1="14" x2="16.5" y2="20"/><polyline points="14 18 16.5 20.5 19 18"/></svg>
+      欄位堆疊
+    </button>
+    <!-- 功能②：MAC 自動整合 -->
+    <button class="nav-btn" onclick="goPage('auto')" id="nav-auto">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      MAC 自動整合
+    </button>
+  </nav>
 </header>
 
-<main id="app"></main>
+<!-- ========== 首頁 ========== -->
+<div class="page active" id="page-home">
+  <div class="home-wrap">
+    <p class="home-eyebrow">號段分配 · 兩個獨立工具</p>
+    <h2>選一個功能開始</h2>
+    <p class="lede">兩個工具處理不同的事，全程在你的瀏覽器本機執行，檔案不會上傳。點下方卡片進入。</p>
 
-<div class="modal" id="modal">
-  <div class="box">
-    <h3 id="m-title"></h3>
-    <p id="m-body"></p>
-    <div class="row">
-      <button class="btn btn-ghost btn-sm" onclick="closeModal()">取消</button>
-      <button class="btn btn-primary btn-sm" id="m-ok"></button>
+    <div class="tool-grid">
+      <!-- 功能①卡片 -->
+      <div class="tool-card is-stack" onclick="goPage('stack')">
+        <div class="tc-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="7" height="18" rx="1"/><rect x="13" y="3" width="7" height="8" rx="1"/><line x1="16.5" y1="14" x2="16.5" y2="20"/><polyline points="14 18 16.5 20.5 19 18"/></svg>
+        </div>
+        <h3>欄位堆疊</h3>
+        <p>左右並排的兩組 IMEI／MAC（A、B 與 C、D），把 C、D 欄自動接到 A、B 欄底下，疊成乾淨的單一兩欄。</p>
+        <span class="tc-go">開始堆疊
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>
+        </span>
+      </div>
+
+      <!-- 功能②卡片 -->
+      <div class="tool-card is-auto" onclick="goPage('auto')">
+        <div class="tc-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        <h3>MAC 自動整合</h3>
+        <p>上傳含「号段分配」工作表的 Excel（A 欄 IMEI、B 欄 MAC），自動把 MAC 每 4 筆橫排成 mac1~mac4，產生「工廠使用」工作表。</p>
+        <span class="tc-go">開始整合
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>
+        </span>
+      </div>
+    </div>
+
+    <p class="footnote">本機處理 · 檔案不離開你的裝置</p>
+  </div>
+</div>
+
+<!-- ========== 功能①：欄位堆疊 ========== -->
+<div class="page" id="page-stack">
+  <div class="wrap">
+    <p class="sec-eyebrow">功能① · 欄位堆疊</p>
+
+    <!-- 示意圖：原始左右並排 → 接到底下 -->
+    <div class="schematic">
+      <div>
+        <div class="stage-label">原始 · 左右並排</div>
+        <div class="pair">
+          <div class="col base"><div class="head">A · IMEI</div><div class="cells"><span></span><span></span><span></span></div></div>
+          <div class="col base"><div class="head">B · MAC</div><div class="cells"><span></span><span></span><span></span></div></div>
+          <div class="col move"><div class="head">C · IMEI</div><div class="cells"><span></span><span></span><span></span></div></div>
+          <div class="col move"><div class="head">D · MAC</div><div class="cells"><span></span><span></span><span></span></div></div>
+        </div>
+      </div>
+      <div class="sch-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>
+        <small>堆疊</small>
+      </div>
+      <div class="stacked">
+        <div class="stage-label">完成 · 接在底下</div>
+        <div class="pair">
+          <div class="col base"><div class="head">A · IMEI</div><div class="cells"><span></span><span></span><span></span><span class="moved drop"></span><span class="moved drop"></span></div></div>
+          <div class="col base"><div class="head">B · MAC</div><div class="cells"><span></span><span></span><span></span><span class="moved drop"></span><span class="moved drop"></span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 拖放區 -->
+    <div class="drop-card" id="stDrop" tabindex="0" role="button" aria-label="選擇或拖入 Excel 檔案">
+      <div class="d-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 5 17 10"/><line x1="12" y1="5" x2="12" y2="16"/></svg>
+      </div>
+      <h3>拖入 Excel，或<span class="pick">點此選擇檔案</span></h3>
+      <p>支援 .xlsx / .xlsm / .csv，讀取第一個工作表</p>
+      <input type="file" id="stFile" accept=".xlsx,.xlsm,.csv" hidden>
+    </div>
+    <p class="stack-hint">A、B 欄＝原本資料　·　C、D 欄＝接到底下　·　處理後輸出乾淨兩欄</p>
+
+    <div class="error-box" id="stError"></div>
+
+    <!-- 堆疊結果 -->
+    <div class="stack-result" id="stResult">
+      <div class="filebar">
+        <span class="dot"></span><span class="name" id="stFname"></span>
+        <button class="reset" id="stReset">換一個檔案</button>
+      </div>
+
+      <div class="stats">
+        <div class="stat imei">
+          <div class="k"><span class="stag"></span>A 欄 · IMEI</div>
+          <div class="v" id="stImeiTotal">0</div>
+          <div class="break" id="stImeiBreak"></div>
+        </div>
+        <div class="stat mac">
+          <div class="k"><span class="stag"></span>B 欄 · MAC</div>
+          <div class="v" id="stMacTotal">0</div>
+          <div class="break" id="stMacBreak"></div>
+        </div>
+      </div>
+
+      <div class="preview-box">
+        <div class="ptitle">預覽 · 接合處前後各幾筆</div>
+        <table>
+          <thead><tr><th style="width:64px">列</th><th>A · IMEI</th><th>B · MAC</th></tr></thead>
+          <tbody id="stPreviewBody"></tbody>
+        </table>
+      </div>
+
+      <button class="download-lg" id="stDownload">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        下載合併後的 Excel
+      </button>
     </div>
   </div>
 </div>
 
-<footer class="wrap">
-  資料來源：iPAS 經濟部產業人才能力鑑定「中級 AI 應用規劃師」歷屆公告試題（114-2、115-1，科目一＋科目三，共 200 題），以及官方學習指引教材附練習題（70 題，含詳解）。<br>
-  本工具僅供自我練習，答案以官方公告為準。<span id="store-note">進度儲存在你的瀏覽器中。</span>
-  <span style="white-space:nowrap">　<a href="#" onclick="exportData(event)">匯出備份</a> · <a href="#" onclick="importData(event)">匯入備份</a></span>
-</footer>
+<!-- ========== 功能②：MAC 自動整合 ========== -->
+<div class="page" id="page-auto">
+  <div class="wrap">
+    <p class="sec-eyebrow" style="--move:var(--accent);">功能② · MAC 自動整合</p>
+
+    <!-- 上傳區 -->
+    <div id="uploadZone" class="upload-zone"
+      onclick="document.getElementById('fileInput').click()"
+      ondragover="onDragOver(event)" ondragleave="onDragLeave()" ondrop="onDrop(event)">
+      <div class="upload-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </div>
+      <h3>點擊或拖曳上傳 Excel 檔案</h3>
+      <p>需包含「号段分配」工作表（IMEI + MAC）</p>
+    </div>
+    <input type="file" id="fileInput" accept=".xlsx,.xls" onchange="onFileChange(event)"/>
+
+    <!-- 處理中 -->
+    <div id="processingArea" class="processing">
+      <div class="spinner"></div>
+      <p id="processingMsg">處理中...</p>
+      <div class="processing-steps">
+        <div class="p-step" id="ps1">① 讀取 号段分配</div>
+        <div class="p-step" id="ps2">② 整理 MAC → mac1~mac4</div>
+        <div class="p-step" id="ps3">③ 建立 工廠使用 工作表</div>
+        <div class="p-step" id="ps4">④ 複製 IMEI + mac1~mac4</div>
+        <div class="p-step" id="ps5">⑤ 完成輸出</div>
+      </div>
+    </div>
+
+    <!-- 結果區 -->
+    <div id="resultArea" class="result-area">
+      <div class="result-grid">
+        <div>
+          <div class="panel">
+            <div class="panel-hd">處理完成</div>
+            <div class="panel-bd">
+              <div class="file-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <div>
+                  <div class="file-badge-name" id="fName"></div>
+                  <div class="file-badge-sub" id="fInfo"></div>
+                </div>
+              </div>
+              <ul class="summary-list">
+                <li>
+                  <div class="s-icon s-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  <span>IMEI 列數：</span><strong id="sumImei">—</strong>
+                </li>
+                <li>
+                  <div class="s-icon s-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  <span>MAC 組數：</span><strong id="sumMac">—</strong>
+                </li>
+                <li>
+                  <div class="s-icon s-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  <span>新增工作表：</span><strong>工廠使用</strong>
+                </li>
+              </ul>
+              <button class="btn btn-green" onclick="downloadResult()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                下載 Excel
+              </button>
+              <div class="smsg" id="dlMsg"></div>
+              <div class="divider"></div>
+              <button class="btn btn-outline" onclick="resetAll()">重新上傳</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-hd">
+            <span>「工廠使用」工作表預覽</span>
+            <span id="previewCount" style="font-family:var(--mono);font-size:10px;color:var(--hint);"></span>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>A　IMEI</th>
+                  <th>B　mac1</th>
+                  <th>C　mac2</th>
+                  <th>D　mac3</th>
+                  <th>E　mac4</th>
+                  <th>F　pcba sn</th>
+                  <th>G　組裝sn</th>
+                </tr>
+              </thead>
+              <tbody id="previewBody"></tbody>
+            </table>
+          </div>
+          <div class="tbl-foot" id="previewFoot"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script src="script.js"></script>
 </body>
