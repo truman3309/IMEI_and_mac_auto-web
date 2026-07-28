@@ -1,4 +1,4 @@
-<style>
+
 :root{
   --ink:#15212b; --ink-2:#33424f; --muted:#6a7785; --line:#dfddd5;
   --paper:#f4f2ed; --surface:#ffffff; --surface-2:#faf8f3;
@@ -209,4 +209,4 @@ footer a{color:var(--muted)}
 .seg button.on{background:var(--surface);color:var(--brand);box-shadow:var(--shadow)}
 .fade{animation:fade .3s ease}
 @keyframes fade{from{opacity:0}to{opacity:1}}
-</style>
+
