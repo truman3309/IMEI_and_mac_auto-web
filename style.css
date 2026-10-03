@@ -1,7 +1,7 @@
 /* ============================================================
    號段分配工具集 — style.css
-   設計方向：Apple Liquid Glass（毛玻璃）
-   藍紫粉漸層背景 + 半透明玻璃卡片 + 高光邊緣 + 膠囊按鈕
+   設計方向：Apple Liquid Glass（低飽和版）
+   淡灰藍底色 + 半透明玻璃卡片 + 高光邊緣 + 膠囊按鈕
    表格底下墊較不透明的一層，長串 IMEI / MAC 才好讀
    ============================================================ */
 
@@ -13,44 +13,44 @@
   --ink-faint:  rgba(29,29,31,.48);
   --hint:       var(--ink-faint);
 
-  /* 背景漸層與光球 */
-    --bg-a:#14171E; --bg-b:#191C26; --bg-c:#1F1B26;
-    --orb-1:rgba(90,110,160,.22);
-    --orb-2:rgba(70,120,150,.18);
+  /* 背景漸層與光球（低飽和） */
+  --bg-a:#E9EEF4; --bg-b:#E4E7EF; --bg-c:#EDE8EC;
+  --orb-1:rgba(255,255,255,.80);
+  --orb-2:rgba(184,205,226,.50);
 
   /* 玻璃 */
-  --glass:        rgba(255,255,255,.42);
-  --glass-strong: rgba(255,255,255,.66);
-  --glass-solid:  rgba(255,255,255,.88);
-  --glass-field:  rgba(255,255,255,.50);
-  --glass-border: rgba(255,255,255,.65);
-  --glass-hi:     rgba(255,255,255,.65);
-  --glass-shadow: 0 8px 32px rgba(31,38,135,.15);
-  --blur:         blur(24px) saturate(180%);
+  --glass:        rgba(255,255,255,.58);
+  --glass-strong: rgba(255,255,255,.80);
+  --glass-solid:  rgba(255,255,255,.92);
+  --glass-field:  rgba(255,255,255,.62);
+  --glass-border: rgba(255,255,255,.90);
+  --glass-hi:     rgba(255,255,255,.90);
+  --glass-shadow: 0 8px 32px rgba(40,55,90,.10);
+  --blur:         blur(24px) saturate(160%);
 
   /* 沿用舊變數名稱（HTML 與其他規則會引用） */
-  --paper:      rgba(255,255,255,.50);
-  --card:       rgba(255,255,255,.42);
+  --paper:      rgba(255,255,255,.55);
+  --card:       rgba(255,255,255,.58);
   --line:       rgba(29,29,31,.10);
   --line-strong:rgba(29,29,31,.28);
 
   /* 藍色系（原本的 blueprint） */
   --blueprint:      #0071E3;
   --blueprint-deep: #1D1D1F;
-  --blueprint-soft: rgba(0,113,227,.12);
-  --blueprint-line: rgba(0,113,227,.12);
+  --blueprint-soft: rgba(0,113,227,.10);
+  --blueprint-line: rgba(0,113,227,.10);
 
   /* 功能色：綠 = IMEI／成功；橘 = MAC／注意；紅 = 錯誤 */
-  --teal:       #2FB551;
-  --teal-soft:  rgba(52,199,89,.20);
+  --teal:       #2FA84F;
+  --teal-soft:  rgba(52,199,89,.16);
   --teal-deep:  #1C7A34;
 
-  --amber:      #FF9F0A;
-  --amber-soft: rgba(255,159,10,.22);
-  --amber-deep: #B45F00;
+  --amber:      #E8920A;
+  --amber-soft: rgba(255,159,10,.18);
+  --amber-deep: #A35A00;
 
   --red:        #D70015;
-  --red-soft:   rgba(255,59,48,.14);
+  --red-soft:   rgba(255,59,48,.12);
 
   --accent:     #C77700;
 
@@ -61,7 +61,7 @@
   --radius-sm: 12px;
   --radius: 24px;
   --shadow-card: var(--glass-shadow), inset 0 1px 0 var(--glass-hi);
-  --shadow-lift: 0 16px 44px rgba(31,38,135,.25), inset 0 1px 0 var(--glass-hi);
+  --shadow-lift: 0 16px 44px rgba(40,55,90,.18), inset 0 1px 0 var(--glass-hi);
 
   --ease: cubic-bezier(.22,.8,.32,1);
 }
@@ -72,40 +72,42 @@
     --ink-soft:   rgba(245,245,247,.70);
     --ink-faint:  rgba(245,245,247,.48);
 
-    --bg-a:#1B2A4E; --bg-b:#3A2A6B; --bg-c:#5B2A55;
-    --orb-1:rgba(120,140,255,.45);
-    --orb-2:rgba(80,200,255,.35);
+    --bg-a:#14171E; --bg-b:#191C26; --bg-c:#1F1B26;
+    --orb-1:rgba(90,110,160,.22);
+    --orb-2:rgba(70,120,150,.18);
 
-    --glass:        rgba(30,30,40,.42);
-    --glass-strong: rgba(50,50,64,.66);
-    --glass-solid:  rgba(28,28,38,.90);
-    --glass-field:  rgba(255,255,255,.09);
-    --glass-border: rgba(255,255,255,.16);
-    --glass-hi:     rgba(255,255,255,.14);
+    --glass:        rgba(30,30,40,.50);
+    --glass-strong: rgba(50,50,64,.70);
+    --glass-solid:  rgba(28,28,38,.92);
+    --glass-field:  rgba(255,255,255,.08);
+    --glass-border: rgba(255,255,255,.14);
+    --glass-hi:     rgba(255,255,255,.12);
     --glass-shadow: 0 8px 32px rgba(0,0,0,.45);
 
-    --paper:      rgba(255,255,255,.07);
-    --card:       rgba(30,30,40,.42);
+    --paper:      rgba(255,255,255,.06);
+    --card:       rgba(30,30,40,.50);
     --line:       rgba(255,255,255,.12);
     --line-strong:rgba(255,255,255,.30);
 
     --blueprint:      #64B5FF;
     --blueprint-deep: #F5F5F7;
-    --blueprint-soft: rgba(100,181,255,.20);
-    --blueprint-line: rgba(100,181,255,.12);
+    --blueprint-soft: rgba(100,181,255,.18);
+    --blueprint-line: rgba(100,181,255,.10);
 
     --teal:       #30D158;
-    --teal-soft:  rgba(48,209,88,.22);
+    --teal-soft:  rgba(48,209,88,.20);
     --teal-deep:  #5CE07F;
 
     --amber:      #FF9F0A;
-    --amber-soft: rgba(255,159,10,.24);
+    --amber-soft: rgba(255,159,10,.22);
     --amber-deep: #FFB84D;
 
     --red:        #FF6B61;
-    --red-soft:   rgba(255,69,58,.22);
+    --red-soft:   rgba(255,69,58,.20);
 
     --accent:     #FFB84D;
+
+    --shadow-lift: 0 16px 44px rgba(0,0,0,.55), inset 0 1px 0 var(--glass-hi);
   }
 }
 
@@ -168,7 +170,7 @@ header{
   padding: 12px 28px;
   background: var(--glass);
   border-bottom: 1px solid var(--glass-border);
-  box-shadow: 0 4px 24px rgba(31,38,135,.10), inset 0 1px 0 var(--glass-hi);
+  box-shadow: 0 4px 24px rgba(40,55,90,.08), inset 0 1px 0 var(--glass-hi);
 }
 .logo{
   font-family: var(--sans);
@@ -203,8 +205,8 @@ header{
 .nav-btn:hover{ color: var(--blueprint); }
 .nav-btn.active{
   color: var(--ink);
-  background: var(--glass-strong);
-  box-shadow: 0 1px 4px rgba(0,0,0,.15), inset 0 1px 0 var(--glass-hi);
+  background: var(--glass-solid);
+  box-shadow: 0 1px 4px rgba(0,0,0,.12), inset 0 1px 0 var(--glass-hi);
 }
 
 /* ============================================================
@@ -295,10 +297,10 @@ header{
   margin-bottom:20px;
   border: none;
   color:#fff;
-  box-shadow: 0 6px 16px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.4);
+  box-shadow: 0 6px 16px rgba(0,0,0,.14), inset 0 1px 0 rgba(255,255,255,.4);
 }
-.tool-card.is-stack .tc-icon{ background: linear-gradient(145deg,#5EE38A,#28A745); color:#fff; }
-.tool-card.is-auto  .tc-icon{ background: linear-gradient(145deg,#FFB84D,#FF8A00); color:#fff; }
+.tool-card.is-stack .tc-icon{ background: linear-gradient(145deg,#6FCF8E,#3FA85E); color:#fff; }
+.tool-card.is-auto  .tc-icon{ background: linear-gradient(145deg,#F0B867,#D98F2B); color:#fff; }
 .tc-icon svg{ width:24px; height:24px; }
 
 .tool-card h3{
@@ -430,7 +432,7 @@ header{
   margin-top:18px;
   padding:14px 18px;
   background: var(--red-soft);
-  border:1px solid rgba(255,59,48,.3);
+  border:1px solid rgba(255,59,48,.28);
   border-radius: 16px;
   color: var(--red);
   font-family: var(--sans); font-size:13.5px; line-height:1.6;
@@ -453,7 +455,7 @@ header{
 .filebar .dot{
   width:8px; height:8px; border-radius:50%;
   background: #34C759;
-  box-shadow: 0 0 8px #34C759;
+  box-shadow: 0 0 8px rgba(52,199,89,.7);
 }
 .filebar .name{ font-family: var(--mono); font-size:13px; color: var(--ink); flex:1; word-break:break-all; }
 .filebar .reset{
@@ -480,8 +482,8 @@ header{
   color: var(--ink-soft); text-transform:none; margin-bottom:10px;
 }
 .stat .stag{ width:9px; height:9px; border-radius:50%; }
-.stat.imei .stag{ background: #34C759; box-shadow:0 0 8px rgba(52,199,89,.7); }
-.stat.mac .stag{ background: #FF9F0A; box-shadow:0 0 8px rgba(255,159,10,.7); }
+.stat.imei .stag{ background: #34C759; box-shadow:0 0 8px rgba(52,199,89,.6); }
+.stat.mac .stag{ background: #FF9F0A; box-shadow:0 0 8px rgba(255,159,10,.6); }
 .stat .v{
   font-family: var(--sans); font-weight:700;
   font-size: 40px; color: var(--ink);
@@ -535,7 +537,7 @@ tbody tr:hover{ background: var(--blueprint-soft); }
   color: #fff;
   border:none; border-radius: 980px;
   font-family: var(--sans); font-size:16px; letter-spacing:0; font-weight:500;
-  box-shadow: 0 6px 18px rgba(0,113,227,.4), inset 0 1px 0 rgba(255,255,255,.35);
+  box-shadow: 0 6px 18px rgba(0,113,227,.32), inset 0 1px 0 rgba(255,255,255,.35);
   transition: background .18s var(--ease), transform .12s var(--ease);
 }
 .download-lg svg{ width:18px; height:18px; }
@@ -563,9 +565,9 @@ tbody tr:hover{ background: var(--blueprint-soft); }
   width:52px; height:52px; margin:0 auto 16px;
   display:flex; align-items:center; justify-content:center;
   border-radius:16px;
-  background: linear-gradient(145deg,#FFB84D,#FF8A00);
+  background: linear-gradient(145deg,#F0B867,#D98F2B);
   color:#fff;
-  box-shadow: 0 6px 16px rgba(255,138,0,.35), inset 0 1px 0 rgba(255,255,255,.4);
+  box-shadow: 0 6px 16px rgba(217,143,43,.30), inset 0 1px 0 rgba(255,255,255,.4);
 }
 .upload-icon svg{ width:24px; height:24px; }
 .upload-zone h3{ font-size:18px; font-weight:600; margin-bottom:6px; }
@@ -694,9 +696,9 @@ tbody tr:hover{ background: var(--blueprint-soft); }
 .btn:active{ transform: scale(.97); }
 .btn-green{
   background: var(--teal); color:#fff;
-  box-shadow: 0 6px 16px rgba(47,181,81,.4), inset 0 1px 0 rgba(255,255,255,.35);
+  box-shadow: 0 6px 16px rgba(47,168,79,.32), inset 0 1px 0 rgba(255,255,255,.35);
 }
-.btn-green:hover{ background: #28A745; }
+.btn-green:hover{ background: #28963F; }
 .btn-outline{
   background: var(--glass-field); border-color: var(--glass-border); color: var(--blueprint);
 }
@@ -737,9 +739,9 @@ tbody tr:hover{ background: var(--blueprint-soft); }
 /* ---------- 不支援 backdrop-filter 的瀏覽器：改用較不透明的底色 ---------- */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
   :root{
-    --glass:        rgba(255,255,255,.84);
-    --glass-strong: rgba(255,255,255,.94);
-    --card:         rgba(255,255,255,.84);
+    --glass:        rgba(255,255,255,.86);
+    --glass-strong: rgba(255,255,255,.95);
+    --card:         rgba(255,255,255,.86);
   }
   @media (prefers-color-scheme: dark){
     :root{
